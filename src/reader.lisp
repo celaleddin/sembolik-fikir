@@ -12,11 +12,40 @@
            #:make-phrase
            #:make-expression
            #:make-action
+           #:make-procedure
+           #:make-code-block
            #:expression-phrases
 
            #:read-source-code))
 
 (in-package #:sf/reader)
+
+(defstruct phrase base extension)
+;;  araba'dan
+;;   sayı'nın
+;; <base>'<extension>
+
+(defstruct procedure params body)
+;;  [ sayı | sayı'nın karesi. ]
+;;  [ <params> | <body> ]
+;;
+;;  [ 5'in karesi. ]
+;;  [ <body> ]
+
+(defstruct expression phrases action)
+;; istanbul'dan ankara'ya git.
+;; <phrases> <action>.
+
+(defstruct action name parameter)
+;; git
+;; <name>
+;;
+;; yap: [ t | t'yi ayarla. ]
+;; <name>: <parameter>
+
+(defstruct code-block body)
+;; ( 1 ekle: 5. 10'un karesi. )
+;; ( <body> )
 
 (defvar +whitespace-chars+ '(#\newline #\space #\tab))
 (defun read-next-char (stream)
@@ -31,16 +60,10 @@
     (finally (return nil))))
 (defun bool-value (thing) (not (not thing)))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defstruct procedure params body)
-  (defstruct expression phrases action)
-  (defstruct action name parameter)
-  (defstruct code-block body)
-  (defstruct phrase word extension is-word-lisp-object?))
-
 (defun phrase-is-parametric? (phrase)
-  (and (not (phrase-is-word-lisp-object? phrase))
-       (bool-value (find #\: (phrase-word phrase)))))
+  (with-slots (base) phrase
+    (and (symbolp base)
+         (bool-value (find #\: (symbol-name base))))))
 
 (defun split-into-expressions (source-code)
   (labels ((trim-strings-and-remove-empty-ones (list)
@@ -78,8 +101,6 @@
                ((member next-char +whitespace-chars+)
                 (discard-whitespace stream)
                 (next-iteration))
-               ((equal next-char #\[) (read-procedure stream))
-               ((equal next-char #\() (read-group-of-expressions stream))
                (t (read-phrase stream)))
       into expr)
 
@@ -95,7 +116,8 @@
                                  (1- (length expr))))
             (phrases (subseq expr 0 action-position))
             (action-phrase (nth action-position expr))
-            (action (make-action :name (let ((action-name (phrase-word action-phrase)))
+            (action (make-action :name (let* ((base (phrase-base action-phrase))
+                                              (action-name (symbol-name base)))
                                          (if is-action-parametric?
                                              (subseq action-name 0 (1- (length action-name)))
                                              action-name))
@@ -106,7 +128,7 @@
 (defun read-phrase (stream)
   (iterate
     (with is-extension? = nil)
-    (with word-as-lisp-object = nil)
+    (with base = nil)
     (for next-char = (peek-next-char stream))
 
     (until (or (equal next-char :end)
@@ -118,9 +140,15 @@
        (setf is-extension? t)
        (next-iteration))
 
-      ((and (first-iteration-p)
-            (find next-char "0123456789\"#"))
-       (setf word-as-lisp-object (read-lisp-object stream))
+      ((first-iteration-p)
+       (setf base (cond
+                    ((find next-char "0123456789\"#")
+                     (read-lisp-object stream))
+                    ((equal next-char #\[)
+                     (read-procedure stream))
+                    ((equal next-char #\()
+                     (read-group-of-expressions stream))
+                    (t nil)))
        (next-iteration)))
 
     (if is-extension?
@@ -129,11 +157,10 @@
 
     (finally
      (return
-       (make-phrase :word (or word-as-lisp-object word)
+       (make-phrase :base (or base (sb-int:keywordicate word))
                     :extension (if (string= extension "")
                                    nil
-                                   extension)
-                    :is-word-lisp-object? (bool-value word-as-lisp-object))))))
+                                   extension))))))
 
 (defun read-procedure (stream)
   (iterate

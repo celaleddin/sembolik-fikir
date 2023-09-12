@@ -11,30 +11,34 @@
                                         (car (expression-phrases (car expr-list)))))
                   rest)))
     (test "kelime"
-          (make-phrase :word "kelime"))
+          (make-phrase :base :|kelime|))
 
     (test "kelime'nin"
-          (make-phrase :word "kelime"
+          (make-phrase :base :|kelime|
                        :extension "nin"))
 
     (test "1'in"
-          (make-phrase :word 1
-                       :extension "in"
-                       :is-word-lisp-object? t))
+          (make-phrase :base 1
+                       :extension "in"))
 
     (test "\"tırnak içi\"'nden"
-          (make-phrase :word "tırnak içi"
-                       :extension "nden"
-                       :is-word-lisp-object? t))
+          (make-phrase :base "tırnak içi"
+                       :extension "nden"))
 
     (test "#(1 2 3)"
-          (make-phrase :word #(1 2 3)
-                       :is-word-lisp-object? t))
+          (make-phrase :base #(1 2 3)))
 
     (test "#(1 2 3)'nden"
-          (make-phrase :word #(1 2 3)
-                       :extension "nden"
-                       :is-word-lisp-object? t))
+          (make-phrase :base #(1 2 3)
+                       :extension "nden"))
+
+    (test "()'in"
+          (make-phrase :base (make-code-block)
+                       :extension "in"))
+
+    (test "[]'in"
+          (make-phrase :base (make-procedure)
+                       :extension "in"))
     ))
 
 (defun test-expression ()
@@ -44,27 +48,24 @@
                   rest)))
     (test "ankara'dan istanbul'a git"
           (make-expression :phrases (list
-                                     (make-phrase :word "ankara"
+                                     (make-phrase :base :|ankara|
                                                   :extension "dan")
-                                     (make-phrase :word "istanbul"
+                                     (make-phrase :base :|istanbul|
                                                   :extension "a"))
                            :action (make-action :name "git")))
 
-    (test "1'den 5'e-kadar yap: prosedür"
+    (test "1'den 5'e-kadar yap: []"
           (make-expression :phrases (list
-                                     (make-phrase :word 1
-                                                  :extension "den"
-                                                  :is-word-lisp-object? t)
-                                     (make-phrase :word 5
-                                                  :extension "e-kadar"
-                                                  :is-word-lisp-object? t))
+                                     (make-phrase :base 1
+                                                  :extension "den")
+                                     (make-phrase :base 5
+                                                  :extension "e-kadar"))
                            :action (make-action :name "yap"
-                                                :parameter (make-phrase :word "prosedür"))))
+                                                :parameter (make-phrase :base (make-procedure)))))
 
     (test "1 2 3 4 5 topla"
           (make-expression :phrases (mapcar (lambda (i)
-                                              (make-phrase :word i
-                                                           :is-word-lisp-object? t))
+                                              (make-phrase :base i))
                                             '(1 2 3 4 5))
                            :action (make-action :name "topla")))
     ))
