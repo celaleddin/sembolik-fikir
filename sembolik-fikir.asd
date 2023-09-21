@@ -1,4 +1,7 @@
-(asdf:defsystem :sembolik-fikir
+(defclass sf-source-file (asdf:cl-source-file)
+  ((type :initform "sf")))
+
+(defsystem :sembolik-fikir
   :description "A programming language in Turkish"
   :author "Celaleddin Hidayetoglu <celaleddin@sembolik-fikir.com>"
   :depends-on (#:split-sequence

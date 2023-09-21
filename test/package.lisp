@@ -2,6 +2,5 @@
   (:nicknames #:sf/tests)
   (:use #:cl
         #:sf
-        #:sf/reader
-        #:sf/transformer)
+        #:sf/reader)
   (:export #:run-reader-tests))

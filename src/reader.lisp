@@ -1,4 +1,4 @@
-(defpackage sembolik-fikir/reader
+(defpackage :sembolik-fikir/reader
   (:nicknames :sf/reader)
   (:use #:cl
         #:split-sequence
@@ -14,11 +14,12 @@
            #:make-action
            #:make-procedure
            #:make-code-block
+
            #:expression-phrases
 
-           #:read-source-code))
+           #:rpl))
 
-(in-package #:sf/reader)
+(in-package :sf/reader)
 
 (defstruct phrase base extension)
 ;;  araba'dan
@@ -48,6 +49,7 @@
 ;; ( <body> )
 
 (defvar +whitespace-chars+ '(#\newline #\space #\tab))
+(defvar +end-of-expression+ '(:end #\.))
 (defun read-next-char (stream)
   (read-char stream nil :end))
 (defun peek-next-char (stream)
@@ -65,37 +67,26 @@
     (and (symbolp base)
          (bool-value (find #\: (symbol-name base))))))
 
-(defun split-into-expressions (source-code)
-  (labels ((trim-strings-and-remove-empty-ones (list)
-             (remove-if (lambda (string)
-                          (string-equal string ""))
-                        (mapcar (lambda (string)
-                                  (string-trim +whitespace-chars+ string))
-                                list))))
-    (let ((depth 0)
-          (delimiter #\.))
-      (trim-strings-and-remove-empty-ones
-       (split-sequence-if (lambda (char)
-                            (and (equal char delimiter)
-                                 (= depth 0)))
-                          source-code
-                          :key (lambda (char)
-                                 (case char
-                                   ((#\[ #\() (incf depth))
-                                   ((#\] #\)) (decf depth)))
-                                 char)
-                          :remove-empty-subseqs t)))))
+(defun rpl ()
+  (loop (format t "~A~%" (read-expression))))
 
-(defun read-source-code (source-code-string)
-  (mapcar (lambda (expr-string)
-            (with-input-from-string (expr-stream expr-string)
-              (read-expression expr-stream)))
-          (split-into-expressions source-code-string)))
+(defun read-source-code% (string)
+  (with-input-from-string (s string)
+    (read-source-code s)))
 
-(defun read-expression (stream)
+(defun read-source-code (&optional (stream *standard-input*))
+  (iterate
+    (for expr = (read-expression stream))
+    (until (not expr))
+    (collect expr)))
+
+(defun read-expression (&optional (stream *standard-input*))
   (iterate
     (for next-char = (peek-next-char stream))
-    (until (equal next-char :end))
+
+    (when (member next-char +end-of-expression+)
+      (read-next-char stream)
+      (finish))
 
     (collect (cond
                ((member next-char +whitespace-chars+)
@@ -105,8 +96,9 @@
       into expr)
 
     (finally
-     (when (= (length expr) 1)
-       (return (make-expression :phrases expr)))
+     (case (length expr)
+       (0 (return nil))
+       (1 (return (make-expression :phrases expr))))
      (let* ((possible-parametric-action-index (- (length expr) 2))
             (possible-parametric-action (nth possible-parametric-action-index expr))
             (is-action-parametric? (and (phrase-p possible-parametric-action)
@@ -131,7 +123,7 @@
     (with base = nil)
     (for next-char = (peek-next-char stream))
 
-    (until (or (equal next-char :end)
+    (until (or (member next-char +end-of-expression+)
                (member next-char +whitespace-chars+)))
 
     (cond
@@ -157,7 +149,7 @@
 
     (finally
      (return
-       (make-phrase :base (or base (sb-int:keywordicate word))
+       (make-phrase :base (or base (intern word))
                     :extension (if (string= extension "")
                                    nil
                                    extension))))))
@@ -168,32 +160,33 @@
     (with after-vertical-bar? = nil)
     (for next-char = (peek-next-char stream))
 
-    (until (and (equal next-char #\])
-                (= paranthesis-depth 1)))
+    (when (and (equal next-char #\])
+               (= paranthesis-depth 0))
+      (read-next-char stream)
+      (finish))
 
     (cond
       ((equal next-char #\[)
-       (incf paranthesis-depth)
-       (read-next-char stream)
-       (next-iteration))
+       (if (first-iteration-p)
+           (progn
+             (read-next-char stream)
+             (next-iteration))
+           (incf paranthesis-depth)))
 
       ((and (equal next-char #\|)
-            (= paranthesis-depth 1))
+            (= paranthesis-depth 0))
        (setf after-vertical-bar? t)
        (read-next-char stream)
        (next-iteration))
 
       ((equal next-char #\])
-       (decf paranthesis-depth)
-       (read-next-char stream)
-       (next-iteration)))
+       (decf paranthesis-depth)))
 
     (if after-vertical-bar?
         (collect (read-next-char stream) into second-part result-type string)
         (collect (read-next-char stream) into first-part result-type string))
 
     (finally
-     (read-next-char stream) ; read closing paranthesis
      (return (if after-vertical-bar?
                  (make-procedure :params (mapcar #'(lambda (param)
                                                      (with-input-from-string (p param)
@@ -201,30 +194,31 @@
                                                  (split-sequence #\space
                                                                  first-part
                                                                  :remove-empty-subseqs t))
-                                 :body (read-source-code second-part))
-                 (make-procedure :params nil :body (read-source-code first-part)))))))
+                                 :body (read-source-code% second-part))
+                 (make-procedure :params nil :body (read-source-code% first-part)))))))
 
 (defun read-group-of-expressions (stream)
   (iterate
     (with paranthesis-depth = 0)
     (for next-char = (peek-next-char stream))
 
-    (until (and (equal next-char #\))
-                (= paranthesis-depth 1)))
+    (when (and (equal next-char #\))
+               (= paranthesis-depth 0))
+      (read-next-char stream)
+      (finish))
 
     (cond
       ((equal next-char #\()
-       (incf paranthesis-depth)
-       (read-next-char stream)
-       (next-iteration))
+       (if (first-iteration-p)
+           (progn
+             (read-next-char stream)
+             (next-iteration))
+           (incf paranthesis-depth)))
 
       ((equal next-char #\))
-       (decf paranthesis-depth)
-       (read-next-char stream)
-       (next-iteration)))
+       (decf paranthesis-depth)))
 
     (collect (read-next-char stream) into result result-type 'string)
 
     (finally
-     (read-next-char stream) ; read closing paranthesis
-     (return (make-code-block :body (read-source-code result))))))
+     (return (make-code-block :body (read-source-code% result))))))
