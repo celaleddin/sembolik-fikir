@@ -1,4 +1,5 @@
 (defpackage :sembolik-fikir
   (:nicknames :sf)
   (:use #:cl
-        #:sf/reader))
+        #:sf/reader)
+  (:export #:rpl))

@@ -4,8 +4,9 @@
 (defsystem :sembolik-fikir
   :description "A programming language in Turkish"
   :author "Celaleddin Hidayetoglu <celaleddin@sembolik-fikir.com>"
-  :depends-on (#:split-sequence
-               #:iterate)
+  :depends-on (#:iterate
+               #:alexandria
+               #:split-sequence)
   :components ((:module "core"
                 :pathname "src"
                 :serial t
