@@ -18,7 +18,8 @@
 
            #:expression-phrases
 
-           #:rpl))
+           #:rpl
+           #:repl))
 
 (in-package :sf/reader)
 
@@ -97,7 +98,7 @@
 (defun phrase-is-parametric? (phrase)
   (with-slots (base) phrase
     (and (symbolp base)
-         (bool-value (ends-with +package-delimiter+ (symbol-name base))))))
+         (bool-value (ends-with #\: (symbol-name base))))))
 
 (defun intern-symbol (word)
   (let* ((parts (split-sequence +package-delimiter+ word :remove-empty-subseqs t)))
@@ -112,6 +113,9 @@
 
 (defun rpl ()
   (loop (format t "~A~%" (transform (read-expression)))))
+
+(defun repl ()
+  (loop (format t "~A~%" (eval (transform (read-expression))))))
 
 (defun read-source-code% (string)
   (with-input-from-string (s string)
