@@ -4,19 +4,8 @@
         #:split-sequence
         #:alexandria
         #:iterate)
-  (:export #:procedure
-           #:expression
-           #:action
-           #:code-block
-           #:phrase
-
-           #:make-phrase
-           #:make-expression
-           #:make-action
-           #:make-procedure
-           #:make-code-block
-
-           #:expression-phrases
+  (:export #:|olsun|
+           #:|olsun:|
 
            #:rpl
            #:repl))
@@ -25,8 +14,24 @@
 
 (defstruct phrase base extension)
 ;;  araba'dan
-;;   sayı'nın
+;; "yazı"'nın
+;;      5'in
 ;; <base>'<extension>
+
+(defstruct expression phrases action)
+;; istanbul'dan ankara'ya git.
+;; <phrases> <action>.
+
+(defstruct action symbol parameter)
+;; git
+;; <symbol>
+;;
+;; yap: [ t | t'yi ayarla. ]
+;; <symbol>: <parameter>
+
+(defstruct code-block body)
+;; ( 1 ekle: 5. 10'un karesi. )
+;; ( <body> )
 
 (defstruct procedure params body)
 ;;  [ sayı | sayı'nın karesi. ]
@@ -34,21 +39,6 @@
 ;;
 ;;  [ 5'in karesi. ]
 ;;  [ <body> ]
-
-(defstruct expression phrases action)
-;; istanbul'dan ankara'ya git.
-;; <phrases> <action>.
-
-(defstruct action name parameter)
-;; git
-;; <name>
-;;
-;; yap: [ t | t'yi ayarla. ]
-;; <name>: <parameter>
-
-(defstruct code-block body)
-;; ( 1 ekle: 5. 10'un karesi. )
-;; ( <body> )
 
 
 ;; `reader-input-stream' implementation to keep track of the last read char.
@@ -166,11 +156,7 @@
                                (1- (length expr))))
           (phrases (subseq expr 0 action-position))
           (action-phrase (nth action-position expr))
-          (action (make-action :name (let* ((base (phrase-base action-phrase))
-                                            (action-name (symbol-name base)))
-                                       (if is-action-parametric?
-                                           (subseq action-name 0 (1- (length action-name)))
-                                           action-name))
+          (action (make-action :symbol (phrase-base action-phrase)
                                :parameter (when is-action-parametric?
                                             (phrase-base (lastcar expr))))))
      (return (make-expression :phrases phrases :action action)))))

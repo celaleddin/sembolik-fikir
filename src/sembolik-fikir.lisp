@@ -2,4 +2,5 @@
   (:nicknames :sf)
   (:use #:cl
         #:sf/reader)
-  (:export #:rpl))
+  (:export #:rpl
+           #:repl))
