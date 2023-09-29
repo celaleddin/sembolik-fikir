@@ -1,0 +1,12 @@
+sf-file >
+
+xyz 5 olsun.
+zyx olsun: 10.
+
+(xyz zyx cl/+) cl/print.
+
+a 2
+b 3
+c 5 olsun: (
+  (a b c cl/*) cl/print.
+).

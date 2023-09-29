@@ -7,6 +7,9 @@
   (:export #:|olsun|
            #:|olsun:|
 
+           #:read-source-code
+           #:transform
+
            #:rpl
            #:repl))
 
@@ -76,7 +79,7 @@
        (iterate ,@iterate-body))))
 
 (defconstant +package-delimiter+ #\/)
-(defvar +whitespace-chars+ '(#\newline #\space #\tab #\,))
+(defvar +whitespace-chars+ '(#\newline #\space #\tab))
 (defvar +end-of-expression+ '(:EOF #\.))
 (defun read-next-char (stream)
   (read-char stream nil :EOF))
@@ -91,11 +94,15 @@
          (bool-value (ends-with #\: (symbol-name base))))))
 
 (defun intern-symbol (word)
-  (let* ((parts (split-sequence +package-delimiter+ word :remove-empty-subseqs t)))
+  (let* ((parts (split-sequence +package-delimiter+ word)))
     (if (= (length parts) 1)
         (intern word)
-        (intern (apply #'concatenate 'string (rest parts))
-                (find-package-case-insensitive (first parts))))))
+        (find-symbol-case-insensitive (second parts) (first parts)))))
+
+(defun find-symbol-case-insensitive (symbol-name package-name)
+  (let ((package (find-package-case-insensitive package-name)))
+    (or (find-symbol symbol-name package)
+        (find-symbol (string-upcase symbol-name) package))))
 
 (defun find-package-case-insensitive (package-name)
   (or (find-package package-name)
