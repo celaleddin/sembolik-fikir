@@ -1,17 +1,18 @@
 (define-generic-mode 'sf-mode
   '() ; comment
-  '()
-  '(("^sf-file >$" 0 font-lock-builtin-face)
+  '("sembol:")
+  '(("^sf >$" 0 font-lock-builtin-face)
 
-    ("[0-9]+" 0 font-lock-constant-face)
-    ("\".*\"" 0 font-lock-string-face)
+    ("'\\S-*" 0 'font-lock-type-face)
 
-    ("\\s-\\(olsun\\)[.:]\\s-*" 1 font-lock-keyword-face)
+    ("\\s-\\(olsun\\)[.:]\\s-" 1 font-lock-keyword-face)
+    ("\\s-\\(|\\)\\s-" 1 font-lock-builtin-face)
 
     ("\\b\\(\\S-+:\\)\\s-" 1 font-lock-function-name-face)
-    ("[^.:[(]\\s-+\\([^]).[:blank:]]+\\)\\s-*[].)]" 1 font-lock-function-name-face)
+    ("\\s-\\([^]).'[:blank:]]+\\)\\s-*[].)]" 1 font-lock-function-name-face)
 
-    ("'\\(\\S-+\\)" 1 'font-lock-type-face))
+    ("\".*\"" 0 font-lock-string-face)
+    ("[0-9]+" 0 font-lock-constant-face))
   '("\\.sf$")
   nil
   "A mode for sembolik-fikir files")

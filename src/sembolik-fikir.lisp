@@ -3,10 +3,11 @@
   (:use #:cl
         #:named-readtables
         #:sf/reader)
-  (:export #:sf-file
+  (:export #:sf
 
            #:|olsun|
            #:|olsun:|
+           #:|sembol:|
 
            #:rpl
            #:repl))
@@ -18,9 +19,10 @@
   (transform (read-source-code stream)))
 
 (defreadtable sf-readtable
+  (:merge :common-lisp)
   (:macro-char #\> #'reader-macro-handler))
 
-(define-symbol-macro sf-file
+(define-symbol-macro sf
     (progn
       (in-package :sf)
       (in-readtable sf-readtable)))

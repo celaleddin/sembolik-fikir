@@ -1,4 +1,4 @@
-sf-file >
+sf >
 
 (yazdır: şey) olsun: (
   şey cl/print.
@@ -8,8 +8,6 @@ xyz 115 olsun.
 zyx olsun: 20.
 
 yazdır: ( xyz zyx cl/+ ).
-
-a "hey" olsun.
 
 a 2
 b 3
@@ -22,5 +20,13 @@ c 5 olsun: (
   a a cl/*.
 ).
 
+test "hey" olsun.
+(test) olsun: (
+  30 40 cl/list.
+).
+test-1 "test" olsun.
+
 yazdır: ( 6'nın karesi ).
-yazdır: a.
+yazdır: ( test' ).
+yazdır: ( test ).
+yazdır: ( test-1 ).

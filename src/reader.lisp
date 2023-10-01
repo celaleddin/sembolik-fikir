@@ -6,6 +6,7 @@
         #:iterate)
   (:export #:|olsun|
            #:|olsun:|
+           #:|sembol:|
 
            #:read-source-code
            #:transform
@@ -144,20 +145,22 @@
              (char= #\. (stream-last-read-char stream)))
     (finish))
 
-  (collect (cond
-             ((member next-char +whitespace-chars+)
-              (discard-whitespace stream)
-              (next-iteration))
-             (t (read-phrase stream)))
-    into expr)
+  (when (member next-char +whitespace-chars+)
+    (discard-whitespace stream)
+    (next-iteration))
+
+  (collect (read-phrase stream) into expr)
 
   (finally
    (case (length expr)
      (0 (return nil))
-     (1 (return (make-expression :phrases expr))))
-   (let* ((possible-parametric-action-index (- (length expr) 2))
+     (1 (let ((phrase (first expr)))
+          (when (phrase-extension phrase)
+            (return (make-expression :phrases expr))))))
+
+   (let* ((possible-parametric-action-index (max 0 (- (length expr) 2)))
           (possible-parametric-action (nth possible-parametric-action-index expr))
-          (is-action-parametric? (and (phrase-p possible-parametric-action)
+          (is-action-parametric? (and possible-parametric-action
                                       (phrase-is-parametric? possible-parametric-action)))
           (action-position (if is-action-parametric?
                                possible-parametric-action-index
@@ -203,7 +206,8 @@
   (finally
    (return
      (make-phrase :base (or base (intern-symbol word))
-                  :extension (if (string= extension "")
+                  :extension (if (and (not is-extension?)
+                                      (string= extension ""))
                                  nil
                                  extension)))))
 

@@ -13,10 +13,7 @@
   (transform-single-or-multiple thing))
 
 (defmethod transform ((phrase phrase))
-  (with-slots (base) phrase
-    (typecase base
-      (symbol base)
-      (t (transform base)))))
+  (transform (phrase-base phrase)))
 
 (defmethod transform ((expr expression))
   (with-slots (action phrases) expr
@@ -28,8 +25,9 @@
            (transform phrases)))
       ((member (action-symbol action) '(|olsun| |olsun:|))
        (transform-expr/olsun expr))
-      (t `(,(get-function-symbol-from-expression expr)
-           ,@(get-function-lambda-list-from-expression expr))))))
+      ((eq (action-symbol action) '|sembol:|)
+       (transform-expr/sembol (action-parameter action)))
+      (t (transform-expr/call expr)))))
 
 (defmethod transform ((code-block code-block))
   (transform-single-or-multiple (code-block-body code-block)))
@@ -43,7 +41,9 @@
 
 (defun transform-expr/single-phrase-with-extension (phrase)
   (with-slots (base extension) phrase
-    (list (transform base) extension)))
+    (if (string= extension "")
+        base
+        (list (transform base) extension))))
 
 (defun get-function-symbol-from-expression (expr)
   (with-slots (action phrases) expr
@@ -61,6 +61,23 @@
     (with-slots (parameter) action
       (append (if parameter (list (transform parameter)) '())
               (mapcar #'transform phrases)))))
+
+(defun transform-expr/sembol (action-parameter)
+  (assert (symbolp action-parameter))
+  `(quote ,action-parameter))
+
+(defun transform-expr/call (expr)
+  (with-slots (action phrases) expr
+    (with-slots (symbol parameter) action
+      (if (and (not phrases)
+               (not (action-parameter action)))
+          (let ((fun-sym (gensym "fun-")))
+            `(let ((,fun-sym (handler-case (function ,symbol)
+                               (undefined-function ()
+                                 (lambda () ,symbol)))))
+               (funcall ,fun-sym)))
+          `(,(get-function-symbol-from-expression expr)
+            ,@(get-function-lambda-list-from-expression expr))))))
 
 (defun transform-expr/olsun (expr)
   (let* ((action (expression-action expr))
@@ -94,7 +111,7 @@
        (error "no matching 'olsun' pattern")))))
 
 (defun transform-expr/olsun/defvar (var-phrase value-phrase)
-  `(defvar ,(transform var-phrase)
+  `(defparameter ,(transform var-phrase)
      ,(transform value-phrase)))
 
 (defun transform-expr/olsun/let (bindings body)
