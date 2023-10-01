@@ -16,10 +16,10 @@
                (:file "src/sembolik-fikir" :depends-on ("core"))
                (:module "sf"
                 :pathname "src/sf"
-                :serial t
                 :depends-on ("src/sembolik-fikir")
                 :default-component-class sf-source-file
-                :components ((:file "test")))))
+                :serial t
+                :components ((:file "utils")))))
 
 (defsystem :sembolik-fikir/tests
   :description "Sembolik fikir tests"

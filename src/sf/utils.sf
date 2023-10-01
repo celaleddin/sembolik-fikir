@@ -1,0 +1,26 @@
+sf-file >
+
+(yazdır: şey) olsun: (
+  şey cl/print.
+).
+
+xyz 115 olsun.
+zyx olsun: 20.
+
+yazdır: ( xyz zyx cl/+ ).
+
+a "hey" olsun.
+
+a 2
+b 3
+c 5 olsun: (
+  yazdır: (a b c cl/*).
+).
+
+
+(a'nın karesi) olsun: (
+  a a cl/*.
+).
+
+yazdır: ( 6'nın karesi ).
+yazdır: a.
