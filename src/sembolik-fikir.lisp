@@ -4,6 +4,10 @@
         #:named-readtables
         #:sf/reader)
   (:export #:sf-file
+
+           #:|olsun|
+           #:|olsun:|
+
            #:rpl
            #:repl))
 
@@ -21,4 +25,4 @@
       (in-package :sf)
       (in-readtable sf-readtable)))
 
-(import '(sf:sf-file) :cl-user)
+(use-package '(:sf) :cl-user)

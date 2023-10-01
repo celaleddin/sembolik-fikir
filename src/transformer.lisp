@@ -59,7 +59,7 @@
 (defun get-function-lambda-list-from-expression (expr)
   (with-slots (action phrases) expr
     (with-slots (parameter) action
-      (append (if parameter (list parameter) '())
+      (append (if parameter (list (transform parameter)) '())
               (mapcar #'transform phrases)))))
 
 (defun transform-expr/olsun (expr)

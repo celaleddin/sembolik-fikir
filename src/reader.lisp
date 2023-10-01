@@ -86,7 +86,8 @@
 (defun peek-next-char (stream)
   (peek-char nil stream nil :EOF))
 (defun read-lisp-object (stream)
-  (read-preserving-whitespace stream nil :EOF))
+  (let ((*readtable* (named-readtables:find-readtable :common-lisp)))
+    (read-preserving-whitespace stream nil :EOF)))
 (defun bool-value (thing) (not (not thing)))
 (defun phrase-is-parametric? (phrase)
   (with-slots (base) phrase
