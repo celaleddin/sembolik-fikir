@@ -13,21 +13,25 @@
   (transform-single-or-multiple thing))
 
 (defmethod transform ((phrase phrase))
-  (transform (phrase-base phrase)))
+  (with-slots (base base-lisp-expr?) phrase
+    (if base-lisp-expr?
+        base
+        (transform base))))
 
 (defmethod transform ((expr expression))
   (with-slots (action phrases) expr
-    (cond
-      ((not action)
-       (if (and (= (length phrases) 1)
-                (phrase-extension (first phrases)))
-           (transform-expr/single-phrase-with-extension (first phrases))
-           (transform phrases)))
-      ((member (action-symbol action) '(|olsun| |olsun:|))
-       (transform-expr/olsun expr))
-      ((eq (action-symbol action) '|sembol:|)
-       (transform-expr/sembol (action-parameter action)))
-      (t (transform-expr/call expr)))))
+    (if (not action)
+        (if (and (= (length phrases) 1)
+                 (phrase-extension (first phrases)))
+            (transform-expr/single-phrase-with-extension (first phrases))
+            (transform phrases))
+        (case (action-symbol action)
+          ((|olsun| |olsun:|)
+           (transform-expr/olsun expr))
+          (|sözdizimi-olsun:|
+           (transform-expr/sözdizimi-olsun expr))
+          (otherwise
+           (transform-expr/call expr))))))
 
 (defmethod transform ((code-block code-block))
   (transform-single-or-multiple (code-block-body code-block)))
@@ -50,7 +54,7 @@
     (let ((action-symbol (action-symbol action)))
       (if (not (get action-symbol :sf-fun))
           action-symbol
-          (intern (format nil "~A/~{~A~^/~}"
+          (intern (format nil "~A~{^/~A~^/~}"
                           (symbol-name action-symbol)
                           (mapcar #'(lambda (p) (or (phrase-extension p) ""))
                                   phrases))
@@ -61,10 +65,6 @@
     (with-slots (parameter) action
       (append (if parameter (list (transform parameter)) '())
               (mapcar #'transform phrases)))))
-
-(defun transform-expr/sembol (action-parameter)
-  (assert (symbolp action-parameter))
-  `(quote ,action-parameter))
 
 (defun transform-expr/call (expr)
   (with-slots (action phrases) expr
@@ -78,6 +78,18 @@
                (funcall ,fun-sym)))
           `(,(get-function-symbol-from-expression expr)
             ,@(get-function-lambda-list-from-expression expr))))))
+
+(defun transform-expr/sözdizimi-olsun (expr)
+  (let* ((action (expression-action expr))
+         (phrases (expression-phrases expr))
+         (parameter (action-parameter action))
+         (phrase-bases (phrase-bases phrases)))
+    (assert (code-block-p (first phrase-bases)))
+    (assert (code-block-p parameter))
+    (let ((from-expr (first (code-block-body (first phrase-bases)))))
+      `(defmacro ,(get-function-symbol-from-expression from-expr)
+           ,(get-function-lambda-list-from-expression from-expr)
+         ,(transform (code-block-body parameter))))))
 
 (defun transform-expr/olsun (expr)
   (let* ((action (expression-action expr))

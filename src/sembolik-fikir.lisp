@@ -7,7 +7,7 @@
 
            #:|olsun|
            #:|olsun:|
-           #:|sembol:|
+           #:|sözdizimi-olsun:|
 
            #:rpl
            #:repl))

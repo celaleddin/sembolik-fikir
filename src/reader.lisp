@@ -6,7 +6,7 @@
         #:iterate)
   (:export #:|olsun|
            #:|olsun:|
-           #:|sembol:|
+           #:|sözdizimi-olsun:|
 
            #:read-source-code
            #:transform
@@ -16,7 +16,7 @@
 
 (in-package :sf/reader)
 
-(defstruct phrase base extension)
+(defstruct phrase base extension base-lisp-expr?)
 ;;  araba'dan
 ;; "yazı"'nın
 ;;      5'in
@@ -56,7 +56,7 @@
    (prev-last-read-char :accessor stream-prev-last-read-char :initform nil)))
 
 (defmethod sb-gray:stream-read-char ((stream reader-input-stream))
-  (let ((char (read-char (stream-of stream) nil :EOF)))
+  (let ((char (read-char (stream-of stream) nil :eof)))
     (psetf (stream-prev-last-read-char stream) (stream-last-read-char stream)
            (stream-last-read-char stream) char)
     char))
@@ -81,14 +81,14 @@
 
 (defconstant +package-delimiter+ #\/)
 (defvar +whitespace-chars+ '(#\newline #\space #\tab))
-(defvar +end-of-expression+ '(:EOF #\.))
+(defvar +end-of-expression+ '(:eof #\.))
 (defun read-next-char (stream)
-  (read-char stream nil :EOF))
+  (read-char stream nil :eof))
 (defun peek-next-char (stream)
-  (peek-char nil stream nil :EOF))
+  (peek-char nil stream nil :eof))
 (defun read-lisp-object (stream)
   (let ((*readtable* (named-readtables:find-readtable :common-lisp)))
-    (read-preserving-whitespace stream nil :EOF)))
+    (read-preserving-whitespace stream nil :eof)))
 (defun bool-value (thing) (not (not thing)))
 (defun phrase-is-parametric? (phrase)
   (with-slots (base) phrase
@@ -96,8 +96,10 @@
          (bool-value (ends-with #\: (symbol-name base))))))
 
 (defun intern-symbol (word)
-  (let* ((parts (split-sequence +package-delimiter+ word)))
-    (if (= (length parts) 1)
+  (let* ((parts (split-sequence +package-delimiter+ word
+                                :remove-empty-subseqs t)))
+    (if (or (not parts)
+            (= (length parts) 1))
         (intern word)
         (find-symbol-case-insensitive (second parts) (first parts)))))
 
@@ -155,7 +157,8 @@
    (case (length expr)
      (0 (return nil))
      (1 (let ((phrase (first expr)))
-          (when (phrase-extension phrase)
+          (when (or (phrase-extension phrase)
+                    (not (symbolp (phrase-base phrase))))
             (return (make-expression :phrases expr))))))
 
    (let* ((possible-parametric-action-index (max 0 (- (length expr) 2)))
@@ -175,6 +178,7 @@
 
 (defreader (read-phrase stream)
   (with is-extension? = nil)
+  (with is-base-lisp-expr? = nil)
   (with base = nil)
 
   (for next-char = (peek-next-char stream))
@@ -189,14 +193,18 @@
      (next-iteration))
 
     ((first-iteration-p)
-     (setf base (cond
-                  ((find next-char "0123456789\"#")
+     (setf base (case next-char
+                  (#.(coerce "0123456789-\"#" 'list)
                    (read-lisp-object stream))
-                  ((equal next-char #\[)
+                  (#\@
+                   (setf is-base-lisp-expr? t)
+                   (read-next-char stream)
+                   (read-lisp-object stream))
+                  (#\[
                    (read-procedure stream))
-                  ((equal next-char #\()
+                  (#\(
                    (read-group-of-expressions stream))
-                  (t nil)))
+                  (otherwise nil)))
      (next-iteration)))
 
   (if is-extension?
@@ -206,6 +214,7 @@
   (finally
    (return
      (make-phrase :base (or base (intern-symbol word))
+                  :base-lisp-expr? is-base-lisp-expr?
                   :extension (if (and (not is-extension?)
                                       (string= extension ""))
                                  nil

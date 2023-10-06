@@ -20,6 +20,29 @@ c 5 olsun: (
   a a cl/*.
 ).
 
+(x'ten y'ye z'şer listele) olsun: (
+  (k #:from x #:to y #:by z iter/for)
+  (yazdır: k)
+  iter/iterate.
+).
+
+(x'ten y'ye z'şer listele-lispy) olsun: (
+  @(iter:iterate
+     (iter:for k :from |x| :to |y| :by |z|)
+     (print k))'
+).
+
+(sembol: a) sözdizimi-olsun: (
+  @`(quote ,|a|).
+).
+
+(prosedür: a) sözdizimi-olsun: (
+  @`(function ,|a|).
+).
+
+yazdır: (sembol: xyzabc).
+yazdır: (prosedür: cl/+).
+
 test "hey" olsun.
 (test) olsun: (
   30 40 cl/list.
@@ -30,3 +53,6 @@ yazdır: ( 6'nın karesi ).
 yazdır: ( test' ).
 yazdır: ( test ).
 yazdır: ( test-1 ).
+
+yazdır: ( 1'ten 9'ye 2'şer listele ).
+yazdır: ( 1'ten 21'ye 3'şer listele-lispy ).
