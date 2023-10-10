@@ -3,7 +3,8 @@
   (:use #:cl
         #:split-sequence
         #:alexandria
-        #:iterate)
+        #:iterate
+        #:cl-ppcre)
   (:export #:|olsun|
            #:|olsun:|
            #:|sözdizimi-olsun:|
@@ -26,7 +27,7 @@
 ;; istanbul'dan ankara'ya git.
 ;; <phrases> <action>.
 
-(defstruct action symbol parameter)
+(defstruct action symbol parameter lisp-symbol?)
 ;; git
 ;; <symbol>
 ;;
@@ -100,13 +101,8 @@
                                 :remove-empty-subseqs t)))
     (if (or (not parts)
             (= (length parts) 1))
-        (intern word)
-        (find-symbol-case-insensitive (second parts) (first parts)))))
-
-(defun find-symbol-case-insensitive (symbol-name package-name)
-  (let ((package (find-package-case-insensitive package-name)))
-    (or (find-symbol symbol-name package)
-        (find-symbol (string-upcase symbol-name) package))))
+        (intern word )
+        (intern (second parts) (find-package-case-insensitive (first parts))))))
 
 (defun find-package-case-insensitive (package-name)
   (or (find-package package-name)
@@ -171,6 +167,7 @@
           (phrases (subseq expr 0 action-position))
           (action-phrase (nth action-position expr))
           (action (make-action :symbol (phrase-base action-phrase)
+                               :lisp-symbol? (phrase-base-lisp-expr? action-phrase)
                                :parameter (when is-action-parametric?
                                             (phrase-base (lastcar expr))))))
      (return (make-expression :phrases phrases :action action)))))

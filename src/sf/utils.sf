@@ -1,35 +1,29 @@
 sf >
 
 (yazdır: şey) olsun: (
-  şey cl/print.
+  şey @cl:print .
 ).
 
 xyz 115 olsun.
 zyx olsun: 20.
 
-yazdır: ( xyz zyx cl/+ ).
+yazdır: ( xyz zyx @cl:+ ).
 
 a 2
 b 3
 c 5 olsun: (
-  yazdır: (a b c cl/*).
+  yazdır: (a b c @cl:*).
 ).
 
 
 (a'nın karesi) olsun: (
-  a a cl/*.
+  a a @cl:* .
 ).
 
 (x'ten y'ye z'şer listele) olsun: (
-  (k #:from x #:to y #:by z iter/for)
-  (yazdır: k)
-  iter/iterate.
-).
-
-(x'ten y'ye z'şer listele-lispy) olsun: (
   @(iter:iterate
      (iter:for k :from |x| :to |y| :by |z|)
-     (print k))'
+     (print k))
 ).
 
 (sembol: a) sözdizimi-olsun: (
@@ -41,11 +35,11 @@ c 5 olsun: (
 ).
 
 yazdır: (sembol: xyzabc).
-yazdır: (prosedür: cl/+).
+yazdır: (prosedür: @cl:+).
 
 test "hey" olsun.
 (test) olsun: (
-  30 40 cl/list.
+  30 40 @cl:list .
 ).
 test-1 "test" olsun.
 
@@ -54,5 +48,8 @@ yazdır: ( test' ).
 yazdır: ( test ).
 yazdır: ( test-1 ).
 
-yazdır: ( 1'ten 9'ye 2'şer listele ).
-yazdır: ( 1'ten 21'ye 3'şer listele-lispy ).
+yazdır: ( 1'den 9'a 2'şer listele ).
+
+(x'ten y'ye-kadar listele) olsun: (
+  x y @cl:list .
+).

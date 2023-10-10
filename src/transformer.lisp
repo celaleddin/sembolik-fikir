@@ -51,14 +51,21 @@
 
 (defun get-function-symbol-from-expression (expr)
   (with-slots (action phrases) expr
-    (let ((action-symbol (action-symbol action)))
-      (if (not (get action-symbol :sf-fun))
+    (with-slots ((action-symbol symbol)
+                 (action-lisp-symbol? lisp-symbol?))
+        action
+      (if action-lisp-symbol?
           action-symbol
-          (intern (format nil "~A~{^/~A~^/~}"
-                          (symbol-name action-symbol)
-                          (mapcar #'(lambda (p) (or (phrase-extension p) ""))
-                                  phrases))
-                  (symbol-package action-symbol))))))
+          (intern
+           (format nil "~A~{/~A~}"
+                   (symbol-name action-symbol)
+                   (mapcar #'(lambda (p)
+                               (let ((extension (phrase-extension p)))
+                                 (if (null extension)
+                                     ""
+                                     (extension-canonical-form extension))))
+                           phrases))
+           (symbol-package action-symbol))))))
 
 (defun get-function-lambda-list-from-expression (expr)
   (with-slots (action phrases) expr
@@ -137,10 +144,8 @@
 
 (defun transform-expr/olsun/defun (expr body)
   (let ((function-symbol (get-function-symbol-from-expression expr)))
-    `(progn
-       (defun ,function-symbol (,@(get-function-lambda-list-from-expression expr))
-         ,(transform body))
-       (setf (get ',function-symbol :sf-fun) t))))
+    `(defun ,function-symbol (,@(get-function-lambda-list-from-expression expr))
+       ,(transform body))))
 
 (defun phrase-bases (phrases)
   (mapcar #'phrase-base phrases))

@@ -7,11 +7,13 @@
   :depends-on (#:iterate
                #:alexandria
                #:named-readtables
+               #:cl-ppcre
                #:split-sequence)
   :components ((:module "core"
                 :pathname "src"
                 :serial t
                 :components ((:file "reader")
+                             (:file "extension")
                              (:file "transformer")))
                (:file "src/sembolik-fikir" :depends-on ("core"))
                (:module "sf"
