@@ -80,16 +80,22 @@
      (with-reader-input-stream ,stream-sym
        (iterate ,@iterate-body))))
 
-(defconstant +package-delimiter+ #\/)
-(defvar +whitespace-chars+ '(#\newline #\space #\tab))
-(defvar +end-of-expression+ '(:eof #\.))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar +whitespace-chars+ '(#\newline #\space #\tab))
+  (defvar +end-of-expression-chars+ '(:eof #\.))
+  (defvar +package-delimiter+ #\/)
+  (defvar +comment-starter+ #\;))
+
 (defun read-next-char (stream)
   (read-char stream nil :eof))
 (defun peek-next-char (stream)
   (peek-char nil stream nil :eof))
 (defun read-lisp-object (stream)
-  (let ((*readtable* (named-readtables:find-readtable :common-lisp)))
-    (read-preserving-whitespace stream nil :eof)))
+  (handler-bind ((sb-int:simple-reader-package-error #'continue)
+                 (sb-ext:package-locked-error #'continue))
+    (let ((*readtable* (named-readtables:find-readtable :common-lisp)))
+      (read-preserving-whitespace stream nil :eof))))
+
 (defun bool-value (thing) (not (not thing)))
 (defun phrase-is-parametric? (phrase)
   (with-slots (base) phrase
@@ -125,6 +131,12 @@
   (finally (return nil)))
 
 
+(defreader (discard-comment stream)
+  (until (member (peek-next-char stream) '(#\Newline :eof)))
+  (read-next-char stream)
+  (finally (return nil)))
+
+
 (defreader (read-source-code stream)
   (for expr = (read-expression stream))
   (until (not expr))
@@ -134,18 +146,21 @@
 (defreader (read-expression stream)
   (for next-char = (peek-next-char stream))
 
-  (when (member next-char +end-of-expression+)
-    (read-next-char stream)
-    (finish))
-
   (when (and (lastcar expr)
              (numberp (phrase-base (lastcar expr)))
              (char= #\. (stream-last-read-char stream)))
     (finish))
 
-  (when (member next-char +whitespace-chars+)
-    (discard-whitespace stream)
-    (next-iteration))
+  (case next-char
+    (#.+end-of-expression-chars+
+     (read-next-char stream)
+     (finish))
+    (#.+whitespace-chars+
+     (discard-whitespace stream)
+     (next-iteration))
+    (#.+comment-starter+
+     (discard-comment stream)
+     (next-iteration)))
 
   (collect (read-phrase stream) into expr)
 
@@ -180,7 +195,7 @@
 
   (for next-char = (peek-next-char stream))
 
-  (until (or (member next-char +end-of-expression+)
+  (until (or (member next-char +end-of-expression-chars+)
              (member next-char +whitespace-chars+)))
 
   (cond

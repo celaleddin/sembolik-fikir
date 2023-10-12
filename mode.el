@@ -1,5 +1,5 @@
 (define-generic-mode 'sf-mode
-  '() ; comment
+  '(";")
   '()
   '(("^sf >$" 0 font-lock-builtin-face)
 

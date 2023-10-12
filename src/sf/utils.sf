@@ -7,10 +7,12 @@ sf >
 xyz 115 olsun.
 zyx olsun: 20.
 
+;; yorum satırı
+
 yazdır: ( xyz zyx @cl:+ ).
 
 a 2
-b 3
+b 3 ; satır içi yorum
 c 5 olsun: (
   yazdır: (a b c @cl:*).
 ).
@@ -53,3 +55,5 @@ yazdır: ( 1'den 9'a 2'şer listele ).
 (x'ten y'ye-kadar listele) olsun: (
   x y @cl:list .
 ).
+
+;;;; dosya sonu yorum

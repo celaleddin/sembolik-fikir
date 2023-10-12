@@ -55,7 +55,7 @@
                  (action-lisp-symbol? lisp-symbol?))
         action
       (if action-lisp-symbol?
-          action-symbol
+          (ensure-symbol-without-dot-end action-symbol)
           (intern
            (format nil "~A~{/~A~}"
                    (symbol-name action-symbol)
@@ -66,6 +66,10 @@
                                      (extension-canonical-form extension))))
                            phrases))
            (symbol-package action-symbol))))))
+
+(defun ensure-symbol-without-dot-end (symbol)
+  (let ((symbol-name (string-right-trim '(#\.) (symbol-name symbol))))
+    (find-symbol symbol-name (symbol-package symbol))))
 
 (defun get-function-lambda-list-from-expression (expr)
   (with-slots (action phrases) expr
