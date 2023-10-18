@@ -75,13 +75,13 @@
                                           :stream ,stream-sym))))
      ,@body))
 
-(defmacro defreader ((reader-name stream-sym) &body iterate-body)
+(defmacro defreader (reader-name (stream-sym) &body iterate-body)
   `(defun ,reader-name (&optional (,stream-sym *standard-input*))
      (with-reader-input-stream ,stream-sym
        (iterate ,@iterate-body))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar +whitespace-chars+ '(#\newline #\space #\tab))
+  (defvar +whitespace-chars+ '(#\newline #\space #\tab #\,))
   (defvar +end-of-expression-chars+ '(:eof #\.))
   (defvar +package-delimiter+ #\/)
   (defvar +comment-starter+ #\;))
@@ -125,25 +125,25 @@
     (read-source-code s)))
 
 
-(defreader (discard-whitespace stream)
+(defreader discard-whitespace (stream)
   (while (member (peek-next-char stream) +whitespace-chars+))
   (read-next-char stream)
   (finally (return nil)))
 
 
-(defreader (discard-comment stream)
+(defreader discard-comment (stream)
   (until (member (peek-next-char stream) '(#\Newline :eof)))
   (read-next-char stream)
   (finally (return nil)))
 
 
-(defreader (read-source-code stream)
+(defreader read-source-code (stream)
   (for expr = (read-expression stream))
   (until (not expr))
   (collect expr))
 
 
-(defreader (read-expression stream)
+(defreader read-expression (stream)
   (for next-char = (peek-next-char stream))
 
   (when (and (lastcar expr)
@@ -188,7 +188,7 @@
      (return (make-expression :phrases phrases :action action)))))
 
 
-(defreader (read-phrase stream)
+(defreader read-phrase (stream)
   (with is-extension? = nil)
   (with is-base-lisp-expr? = nil)
   (with base = nil)
@@ -233,7 +233,7 @@
                                  extension)))))
 
 
-(defreader (read-procedure stream)
+(defreader read-procedure (stream)
   (with paranthesis-depth = 0)
   (with after-vertical-bar? = nil)
   (for next-char = (peek-next-char stream))
@@ -276,7 +276,7 @@
                (make-procedure :params nil :body (read-source-code% first-part))))))
 
 
-(defreader (read-group-of-expressions stream)
+(defreader read-group-of-expressions (stream)
   (with paranthesis-depth = 0)
   (for next-char = (peek-next-char stream))
 

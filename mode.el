@@ -2,6 +2,7 @@
   '(";")
   '()
   '(("^sf >$" 0 font-lock-builtin-face)
+    ("," 0 'font-lock-comment-face)
 
     ("'\\S-*" 0 'font-lock-type-face)
 

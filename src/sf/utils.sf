@@ -1,7 +1,7 @@
 sf >
 
 (yazdır: şey) olsun: (
-  şey @cl:print .
+  şey @cl:print.
 ).
 
 xyz 115 olsun.
@@ -11,15 +11,15 @@ zyx olsun: 20.
 
 yazdır: ( xyz zyx @cl:+ ).
 
-a 2
-b 3 ; satır içi yorum
+a 2,
+b 3, ; satır içi yorum
 c 5 olsun: (
   yazdır: (a b c @cl:*).
 ).
 
 
 (a'nın karesi) olsun: (
-  a a @cl:* .
+  a a @cl:*.
 ).
 
 (x'ten y'ye z'şer listele) olsun: (
@@ -41,7 +41,7 @@ yazdır: (prosedür: @cl:+).
 
 test "hey" olsun.
 (test) olsun: (
-  30 40 @cl:list .
+  30 40 @cl:list.
 ).
 test-1 "test" olsun.
 
@@ -53,7 +53,7 @@ yazdır: ( test-1 ).
 yazdır: ( 1'den 9'a 2'şer listele ).
 
 (x'ten y'ye-kadar listele) olsun: (
-  x y @cl:list .
+  x y @cl:list.
 ).
 
 ;;;; dosya sonu yorum
