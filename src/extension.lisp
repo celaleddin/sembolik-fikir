@@ -31,10 +31,12 @@
       (return extension))))
 
 (defun extension-canonical-form (extension-string)
-  (let ((ext (find-extension-by-string extension-string)))
-    (regex-replace (extension-regex-string ext)
-                   extension-string
-                   (list (first (extension-variations ext)) 2))))
+  (let ((extension (find-extension-by-string extension-string)))
+    (if extension
+        (regex-replace (extension-regex-string extension)
+                       extension-string
+                       (list (first (extension-variations extension)) 2))
+        extension-string)))
 
 (register-extension ("i" "ı" "ü" "u") "y")
 (register-extension ("e" "a") "y")

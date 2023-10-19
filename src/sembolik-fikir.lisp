@@ -9,6 +9,9 @@
            #:|olsun:|
            #:|sözdizimi-olsun:|
 
+           #:read-source-code
+           #:transform
+
            #:rpl
            #:repl))
 

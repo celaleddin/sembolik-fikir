@@ -3,9 +3,11 @@
 (defgeneric transform (thing))
 
 (defun transform-single-or-multiple (list)
-  (if (= (length list) 1)
-      (transform (first list))
-      `(progn ,@(mapcar #'transform list))))
+  (cond
+    ((null list) nil)
+    ((= (length list) 1)
+     (transform (first list)))
+    (t `(progn ,@(mapcar #'transform list)))))
 
 (defmethod transform (thing) thing)
 

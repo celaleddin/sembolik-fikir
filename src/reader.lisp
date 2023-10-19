@@ -148,7 +148,9 @@
 
   (when (and (lastcar expr)
              (numberp (phrase-base (lastcar expr)))
-             (char= #\. (stream-last-read-char stream)))
+             (let ((last-read-char (stream-last-read-char stream)))
+               (and (not (eq last-read-char :eof))
+                    (char= #\. last-read-char))))
     (finish))
 
   (case next-char

@@ -9,6 +9,7 @@
                #:named-readtables
                #:cl-ppcre
                #:split-sequence)
+  :in-order-to ((test-op (test-op :sembolik-fikir/tests)))
   :components ((:module "core"
                 :pathname "src"
                 :serial t
@@ -26,7 +27,9 @@
 (defsystem :sembolik-fikir/tests
   :description "Sembolik fikir tests"
   :author "Celaleddin Hidayetoglu <celaleddin@sembolik-fikir.com>"
-  :depends-on (#:sembolik-fikir)
-  :pathname "test/"
+  :depends-on (#:sembolik-fikir
+               #:fiveam)
+  :perform (test-op (op c) (symbol-call :sf/tests :run-tests))
+  :pathname "tests/"
   :components ((:file "package")
-               (:file "reader")))
+               (:file "transform")))
