@@ -84,3 +84,10 @@
 
     ((sf "1'den z'ye yap: prosedür") '(|yap:/den/e| |prosedür| 1 |z|))
     ))
+
+(test code-block
+  (is-all-equal
+   ((sf "yazdır: ( bir-sayı bir-başka-sayı topla. 10 )")
+    '(|yazdır:| (progn (|topla//| |bir-sayı| |bir-başka-sayı|)
+                       10)))
+    ))

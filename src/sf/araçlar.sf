@@ -1,0 +1,5 @@
+sf >
+
+(yazdır: şey) olsun: (
+  şey @cl:print.
+).

@@ -1,0 +1,7 @@
+sf >
+
+(x'ten y'ye z'şer listele) olsun: (
+  @(iter:iterate
+     (iter:for k :from |x| :to |y| :by |z|)
+     (iter:collect k)).
+).

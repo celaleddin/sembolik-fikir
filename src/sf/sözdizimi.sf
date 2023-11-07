@@ -1,0 +1,15 @@
+sf >
+
+;; `sembol`ü kendisi olarak ele al
+(sembol: sembol) sözdizimi-olsun: (
+  @`(quote ,|sembol|).
+).
+
+;; `sembol`ün ifade ettiği prosedürü ele al
+(prosedür: sembol) sözdizimi-olsun: (
+  @`(function ,|sembol|).
+).
+
+(sembol değer sabit-olsun) sözdizimi-olsun: (
+  @`(defconstant ,|sembol| ,|değer|).
+).

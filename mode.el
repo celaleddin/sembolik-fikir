@@ -7,15 +7,16 @@
     ("'\\S-*" 0 'font-lock-type-face)
 
     ("\\s-\\(sözdizimi-olsun:\\)\\s-" 1 font-lock-keyword-face)
+    ("\\s-\\(olsun\\)[.:]" 1 font-lock-keyword-face)
 
-    ("\\s-\\(olsun\\)[.:]\\s-" 1 font-lock-keyword-face)
     ("\\s-\\(|\\)\\s-" 1 font-lock-builtin-face)
+    ("\\s-\\(@[(`]\\)" 1 font-lock-builtin-face)
 
     ("\\b\\(\\S-+:\\)\\s-" 1 font-lock-function-name-face)
-    ("\\s-\\([^]).'[:blank:]]+\\)\\s-*[].)]" 1 font-lock-function-name-face)
+    ("[^:]\\s-+\\([^]).'[:blank:]]+\\)\\s-*[].)]" 1 font-lock-function-name-face)
 
     ("\".*\"" 0 font-lock-string-face)
-    ("[0-9]+" 0 font-lock-constant-face))
+    ("\\s-\\([0-9]+\\)\\b" 1 font-lock-constant-face))
   '("\\.sf$")
   (list
    (lambda ()

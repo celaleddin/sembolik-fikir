@@ -22,7 +22,10 @@
                 :depends-on ("src/sembolik-fikir")
                 :default-component-class sf-source-file
                 :serial t
-                :components ((:file "utils")))))
+                :components ((:file "sözdizimi")
+                             (:file "araçlar")
+                             (:file "matematik")
+                             (:file "liste")))))
 
 (defsystem :sembolik-fikir/tests
   :description "Sembolik fikir tests"
