@@ -1,5 +1,23 @@
 sf >
 
+(a değil) olsun: (a @not).
+(değil: a) olsun: (a değil).
+
+(a b *) olsun: (a b @cl:*).
+(a çarpı: b) olsun: (a b *).
+
+(a b /) olsun: (a b @cl:/).
+(a bölü: b) olsun: (a b /).
+
 (a'nın karesi) olsun: (
-  a a @cl:*.
+  a çarpı: a.
 ).
+
+(a tek?) olsun: (a @cl:oddp).
+(a çift?) olsun: (
+  değil: (a tek?).
+).
+
+(a negatif?) olsun: (a @cl:minusp).
+(a sıfır?) olsun: (a @cl:zerop).
+(a pozitif?) olsun: (a @cl:plusp).

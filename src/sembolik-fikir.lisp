@@ -3,6 +3,8 @@
   (:use #:cl
         #:named-readtables
         #:sf/reader)
+  (:shadow #:*
+           #:/)
   (:export #:sf
 
            #:|olsun|
