@@ -59,7 +59,7 @@
       (if action-lisp-symbol?
           (ensure-symbol-without-dot-at-end action-symbol)
           (intern
-           (format nil "~A~{/~A~}"
+           (format nil "~A~{'~A~}"
                    (symbol-name action-symbol)
                    (mapcar #'(lambda (p)
                                (let ((extension (phrase-extension p)))

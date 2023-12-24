@@ -107,7 +107,7 @@
                                 :remove-empty-subseqs t)))
     (if (or (not parts)
             (= (length parts) 1))
-        (intern word )
+        (intern word)
         (intern (second parts) (find-package-case-insensitive (first parts))))))
 
 (defun find-package-case-insensitive (package-name)
