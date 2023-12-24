@@ -146,8 +146,13 @@
 (defreader read-expression (stream)
   (for next-char = (peek-next-char stream))
 
+  ;; to be able to read end of expression in cases:
+  ;; * 3.      - number with a dot but without decimal part
+  ;; * @cl:+.  - a lisp symbol with a dot at the end
+  ;;             (also see function `ensure-symbol-without-dot-at-end')
   (when (and (lastcar expr)
-             (numberp (phrase-base (lastcar expr)))
+             (or (numberp (phrase-base (lastcar expr)))
+                 (phrase-base-lisp-expr? (lastcar expr)))
              (let ((last-read-char (stream-last-read-char stream)))
                (and (not (eq last-read-char :eof))
                     (char= #\. last-read-char))))

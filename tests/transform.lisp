@@ -87,7 +87,7 @@
 
 (test code-block
   (is-all-equal
-   ((sf "yazdır: ( bir-sayı bir-başka-sayı topla. 10 )")
-    '(|yazdır:| (progn (|topla//| |bir-sayı| |bir-başka-sayı|)
+   ((sf "yazdır: ( bir-sayı bir-başka-sayı @cl:+. 10 )")
+    '(|yazdır:| (progn (cl:+ |bir-sayı| |bir-başka-sayı|)
                        10)))
     ))
