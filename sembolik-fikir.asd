@@ -10,15 +10,15 @@
                #:cl-ppcre
                #:split-sequence)
   :in-order-to ((test-op (test-op :sembolik-fikir/tests)))
-  :components ((:module "core"
-                :pathname "src"
+  :components ((:module "çekirdek"
+                :pathname "src/çekirdek"
                 :serial t
                 :components ((:file "reader")
                              (:file "extension")
                              (:file "transformer")))
-               (:file "src/sembolik-fikir" :depends-on ("core"))
+               (:file "src/sembolik-fikir" :depends-on ("çekirdek"))
                (:module "sf"
-                :pathname "src/sf"
+                :pathname "src"
                 :depends-on ("src/sembolik-fikir")
                 :default-component-class sf-source-file
                 :serial t
