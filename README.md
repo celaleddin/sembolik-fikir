@@ -15,4 +15,7 @@ Türkçe'ye daha yakın deneysel programlama dili
 
 > 3'ün karesi.
 9
+
+> 7'den 70'e 6'şar listele.
+(7 13 19 25 31 37 43 49 55 61 67)
 ```
