@@ -191,7 +191,7 @@
           (action (make-action :symbol (phrase-base action-phrase)
                                :lisp-symbol? (phrase-base-lisp-expr? action-phrase)
                                :parameter (when is-action-parametric?
-                                            (phrase-base (lastcar expr))))))
+                                            (lastcar expr)))))
      (return (make-expression :phrases phrases :action action)))))
 
 
@@ -199,11 +199,18 @@
   (with is-extension? = nil)
   (with is-base-lisp-expr? = nil)
   (with base = nil)
+  (with starts-with-dash = nil)
 
   (for next-char = (peek-next-char stream))
 
   (until (or (member next-char +end-of-expression-chars+)
              (member next-char +whitespace-chars+)))
+
+  (when (and (first-iteration-p)
+             (equal next-char #\-))
+    (read-next-char stream)
+    (setf starts-with-dash t
+          next-char (peek-next-char stream)))
 
   (cond
     ((equal next-char #\')
@@ -213,7 +220,7 @@
 
     ((first-iteration-p)
      (setf base (case next-char
-                  (#.(coerce "0123456789-\"#" 'list)
+                  (#.(coerce "0123456789\"#" 'list)
                    (read-lisp-object stream))
                   (#\@
                    (setf is-base-lisp-expr? t)
@@ -231,13 +238,17 @@
       (collect (read-next-char stream) into word result-type string))
 
   (finally
-   (return
-     (make-phrase :base (or base (intern-symbol word))
-                  :base-lisp-expr? is-base-lisp-expr?
-                  :extension (if (and (not is-extension?)
-                                      (string= extension ""))
-                                 nil
-                                 extension)))))
+   (let ((base (if (and starts-with-dash (numberp base))
+                   (- base) base))
+         (word (if starts-with-dash
+                   (format nil "-~A" word) word)))
+     (return
+       (make-phrase :base (or base (intern-symbol word))
+                    :base-lisp-expr? is-base-lisp-expr?
+                    :extension (if (and (not is-extension?)
+                                        (string= extension ""))
+                                   nil
+                                   extension))))))
 
 
 (defreader read-procedure (stream)
