@@ -24,6 +24,7 @@
                 :serial t
                 :components ((:file "sözdizimi")
                              (:file "araçlar")
+                             (:file "prosedür")
                              (:file "matematik")
                              (:file "liste")))))
 

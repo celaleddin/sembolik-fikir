@@ -1,0 +1,13 @@
+sf >
+
+(prosedür'ü uygula) olsun: (
+  prosedür @cl:funcall.
+).
+
+(prosedür'ü uygula: parametre) olsun: (
+  prosedür parametre @cl:funcall.
+).
+
+(fonksiyon'un x'te değeri) olsun: (
+  fonksiyon'u uygula: x.
+).
