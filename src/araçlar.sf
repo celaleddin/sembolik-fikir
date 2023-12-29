@@ -1,5 +1,5 @@
 sf >
 
 (yazdır: şey) olsun: (
-  şey @cl:print.
+  şey @cl:princ.
 ).

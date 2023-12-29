@@ -1,5 +1,8 @@
 sf >
 
+doğru @'t olsun.
+yanlış @'nil olsun.
+
 (a değil) olsun: (a @not).
 (değil: a) olsun: (a değil).
 
@@ -23,11 +26,21 @@ sf >
   a çarpı: a.
 ).
 
-(a tek?) olsun: (a @cl:oddp).
-(a çift?) olsun: (
-  değil: (a tek?).
+(a tek-mi?) olsun: (a @cl:oddp).
+(a çift-mi?) olsun: (
+  değil: (a tek-mi?).
 ).
 
-(a negatif?) olsun: (a @cl:minusp).
-(a sıfır?) olsun: (a @cl:zerop).
-(a pozitif?) olsun: (a @cl:plusp).
+(a negatif-mi?) olsun: (a @cl:minusp).
+(a sıfır-mı?) olsun: (a @cl:zerop).
+(a pozitif-mi?) olsun: (a @cl:plusp).
+
+(f'nin türevi) olsun: (
+  [ t |
+    delta-x 1/100000
+    delta-y ((f'nin (t artı: delta-x)'te değeri) eksi:
+             (f'nin t'de değeri)) olsun: (
+      delta-y bölü: delta-x.
+    ).
+  ]
+).
