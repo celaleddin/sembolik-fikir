@@ -76,18 +76,19 @@
 (defun get-function-lambda-list-from-expression (expr)
   (with-slots (action phrases) expr
     (with-slots (parameter) action
-      (append (if parameter (list (transform parameter)) '())
-              (mapcar #'transform phrases)))))
+      (mapcar #'transform (append (when parameter (list parameter))
+                                  phrases)))))
 
 (defun transform-expr/call (expr)
   (with-slots (action phrases) expr
-    (with-slots (symbol parameter) action
+    (with-slots ((action-symbol symbol)
+                 (action-parameter parameter)) action
       (if (and (not phrases)
-               (not (action-parameter action)))
+               (not action-parameter))
           (let ((fun-sym (gensym "fun-")))
-            `(let ((,fun-sym (handler-case (function ,symbol)
+            `(let ((,fun-sym (handler-case (function ,action-symbol)
                                (undefined-function ()
-                                 (lambda () ,symbol)))))
+                                 (lambda () ,action-symbol)))))
                (funcall ,fun-sym)))
           `(,(get-function-symbol-from-expression expr)
             ,@(get-function-lambda-list-from-expression expr))))))
@@ -96,33 +97,35 @@
   (let* ((action (expression-action expr))
          (phrases (expression-phrases expr))
          (parameter (action-parameter action))
+         (action-parameter-base (when parameter (phrase-base parameter)))
          (phrase-bases (phrase-bases phrases)))
     (assert (code-block-p (first phrase-bases)))
-    (assert (code-block-p parameter))
+    (assert (code-block-p action-parameter-base))
     (let ((from-expr (first (code-block-body (first phrase-bases)))))
       `(defmacro ,(get-function-symbol-from-expression from-expr)
            ,(get-function-lambda-list-from-expression from-expr)
-         ,(transform (code-block-body parameter))))))
+         ,(transform (code-block-body action-parameter-base))))))
 
 (defun transform-expr/olsun (expr)
   (let* ((action (expression-action expr))
          (phrases (expression-phrases expr))
          (parameter (action-parameter action))
+         (action-parameter-base (when parameter (phrase-base parameter)))
          (phrases-length (length phrases))
          (phrase-bases (phrase-bases phrases)))
     (cond
       ((and (= phrases-length 1)
             (code-block-p (first phrase-bases))
-            (code-block-p parameter))
+            (code-block-p action-parameter-base))
        (transform-expr/olsun/defun (first (code-block-body (first phrase-bases)))
-                                   (code-block-body parameter))
+                                   (code-block-body action-parameter-base))
        )
       ((and (> phrases-length 1)
-            (member (type-of parameter) '(code-block procedure)))
-       (typecase parameter
-         (code-block (transform-expr/olsun/let phrase-bases parameter))
+            (member (type-of action-parameter-base) '(code-block procedure)))
+       (typecase action-parameter-base
+         (code-block (transform-expr/olsun/let phrase-bases action-parameter-base))
          (procedure (transform-expr/olsun/let phrase-bases
-                                              (make-code-block :body (list parameter)))))
+                                              (make-code-block :body (list action-parameter-base)))))
        )
       ((and (not parameter)
             (= phrases-length 2)
@@ -131,7 +134,7 @@
       ((and parameter
             (= phrases-length 1)
             (symbolp (first phrase-bases)))
-       (transform-expr/olsun/defvar (first phrase-bases) parameter))
+       (transform-expr/olsun/defvar (first phrase-bases) action-parameter-base))
       (t
        (error "no matching 'olsun' pattern")))))
 
