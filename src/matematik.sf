@@ -4,10 +4,20 @@ sf >
 (değil: a) olsun: (a değil).
 
 (a b *) olsun: (a b @cl:*).
+(a *: b) olsun: (a b *).
 (a çarpı: b) olsun: (a b *).
 
 (a b /) olsun: (a b @cl:/).
+(a /: b) olsun: (a b /).
 (a bölü: b) olsun: (a b /).
+
+(a b +) olsun: (a b @cl:+).
+(a +: b) olsun: (a b +).
+(a artı: b) olsun: (a b +).
+
+(a b -) olsun: (a b @cl:-).
+(a -: b) olsun: (a b -).
+(a eksi: b) olsun: (a b -).
 
 (a'nın karesi) olsun: (
   a çarpı: a.
