@@ -28,7 +28,7 @@
             (transform-expr/single-phrase-with-extension (first phrases))
             (transform phrases))
         (case (action-symbol action)
-          ((|olsun| |olsun:|)
+          ((|olsun| |olsun:| |=:|)
            (transform-expr/olsun expr))
           (|sözdizimi-olsun:|
            (transform-expr/sözdizimi-olsun expr))
@@ -118,8 +118,7 @@
             (code-block-p (first phrase-bases))
             (code-block-p action-parameter-base))
        (transform-expr/olsun/defun (first (code-block-body (first phrase-bases)))
-                                   (code-block-body action-parameter-base))
-       )
+                                   (code-block-body action-parameter-base)))
       ((and (> phrases-length 1)
             (member (type-of action-parameter-base) '(code-block procedure)))
        (typecase action-parameter-base

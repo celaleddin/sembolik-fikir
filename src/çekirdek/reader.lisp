@@ -7,6 +7,7 @@
         #:cl-ppcre)
   (:export #:|olsun|
            #:|olsun:|
+           #:|=:|
            #:|sözdizimi-olsun:|
 
            #:read-source-code
