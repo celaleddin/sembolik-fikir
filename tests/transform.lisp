@@ -9,18 +9,26 @@
 (test simple-variable-definition
   (is-all-equal
     ((sf "a 5 olsun.") '(defparameter |a| 5))
-    ((sf "sayı olsun: 20.") '(defparameter |sayı| 20))))
+    ((sf "sayı olsun: 20.") '(defparameter |sayı| 20))
+    ((sf "b =: 10") '(defparameter |b| 10))
+    ))
 
 (test comments
   (is-all-equal
     ((sf ";; bir yorum") nil)
-    ((sf "10. ;; satır içi yorum") 10)))
+    ((sf "10. ;; satır içi yorum") 10)
+    ((sf "10, 20, 30 @+") '(+ 10 20 30))
+    ))
 
 (test numbers
   (is-all-equal
     ((sf "42") 42)
     ((sf "15.") 15)
-    ((sf "3.1415") 3.1415)))
+    ((sf "3.1415") 3.1415)
+    ((sf "-32") -32)
+    ((sf "1e10") 1e10)
+    ((sf "2/30") 2/30)
+    ))
 
 (test let
   (is-all-equal
@@ -90,4 +98,12 @@
    ((sf "yazdır: ( bir-sayı bir-başka-sayı @cl:+. 10 )")
     '(|yazdır:| (progn (cl:+ |bir-sayı| |bir-başka-sayı|)
                        10)))
+    ))
+
+(test list
+  (is-all-equal
+    ((sf "{ 1 2 3 }") '(list 1 2 3))
+    ((sf "{ 1 (2 3 @+) 4 }") '(list 1 (+ 2 3) 4))
+    ((sf "{ [ x | x'in karesi ] (2 3 @+) @'a-symbol }")
+     '(list (lambda (|x|) (|karesi'in| |x|)) (+ 2 3) 'a-symbol))
     ))

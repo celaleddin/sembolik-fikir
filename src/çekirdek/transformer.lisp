@@ -109,8 +109,9 @@
 (defun transform-expr/olsun (expr)
   (let* ((action (expression-action expr))
          (phrases (expression-phrases expr))
-         (parameter (action-parameter action))
-         (action-parameter-base (when parameter (phrase-base parameter)))
+         (action-parameter (action-parameter action))
+         (action-parameter-base (when action-parameter
+                                  (phrase-base action-parameter)))
          (phrases-length (length phrases))
          (phrase-bases (phrase-bases phrases)))
     (cond
@@ -126,14 +127,14 @@
          (procedure (transform-expr/olsun/let phrase-bases
                                               (make-code-block :body (list action-parameter-base)))))
        )
-      ((and (not parameter)
+      ((and (not action-parameter)
             (= phrases-length 2)
             (symbolp (first phrase-bases)))
-       (transform-expr/olsun/defvar (first phrase-bases) (second phrase-bases)))
-      ((and parameter
+       (transform-expr/olsun/defvar (first phrase-bases) (second phrases)))
+      ((and action-parameter
             (= phrases-length 1)
             (symbolp (first phrase-bases)))
-       (transform-expr/olsun/defvar (first phrase-bases) action-parameter-base))
+       (transform-expr/olsun/defvar (first phrase-bases) action-parameter))
       (t
        (error "no matching 'olsun' pattern")))))
 

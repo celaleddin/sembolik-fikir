@@ -83,7 +83,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar +whitespace-chars+ '(#\newline #\space #\tab #\,))
-  (defvar +end-of-expression-chars+ '(:eof #\.))
+  (defvar +end-of-expression-chars+ '(:eof #\. #\}))
   (defvar +package-delimiter+ #\/)
   (defvar +comment-starter+ #\;))
 
@@ -229,6 +229,9 @@
                    (read-lisp-object stream))
                   (#\[
                    (read-procedure stream))
+                  (#\{
+                   (setf is-base-lisp-expr? t)
+                   (read-list stream))
                   (#\(
                    (read-group-of-expressions stream))
                   (otherwise nil)))
@@ -319,3 +322,34 @@
 
   (finally
    (return (make-code-block :body (read-source-code% result)))))
+
+
+(defreader read-list (stream)
+  (for next-char = (peek-next-char stream))
+
+  (when (equal next-char :eof)
+    (restart-case (error "Listenin sonu gelmeden dosyanın sonu geldi")
+      (continue ()
+        :report "Olduğu kadar listele"
+        :interactive continue
+        (finish))))
+
+  (cond
+    ((member next-char '#.+whitespace-chars+)
+     (discard-whitespace stream)
+     (next-iteration))
+
+    ((and (equal next-char #\{)
+          (first-iteration-p))
+     (read-next-char stream)
+     (next-iteration))
+
+    ((equal next-char #\})
+     (read-next-char stream)
+     (finish)))
+
+  (collect (read-phrase stream) into phrases-list)
+
+  (finally
+   (return `(list ,@(mapcar #'transform phrases-list)))))
+
