@@ -21,13 +21,13 @@
         (transform base))))
 
 (defmethod transform ((expr expression))
-  (with-slots (action phrases) expr
-    (if (not action)
+  (with-slots (actions phrases) expr
+    (if (not actions)
         (if (and (= (length phrases) 1)
                  (phrase-extension (first phrases)))
             (transform-expr/single-phrase-with-extension (first phrases))
             (transform phrases))
-        (case (action-symbol action)
+        (case (action-symbol (first actions))
           ((|olsun| |olsun:| |=:|)
            (transform-expr/olsun expr))
           (|sözdizimi-olsun:|
@@ -52,49 +52,55 @@
         (list (transform base) extension))))
 
 (defun get-function-symbol-from-expression (expr)
-  (with-slots (action phrases) expr
-    (with-slots ((action-symbol symbol)
-                 (action-lisp-symbol? lisp-symbol?))
-        action
-      (if action-lisp-symbol?
-          (ensure-symbol-without-dot-at-end action-symbol)
+  (with-slots (actions phrases) expr
+    (let* ((single-action-symbol (and (= 1 (length actions))
+                                      (action-symbol (first actions))))
+           (single-action-lisp-symbol? (and single-action-symbol
+                                            (action-lisp-symbol? (first actions)))))
+      (if single-action-lisp-symbol?
+          (ensure-symbol-without-dot-at-end single-action-symbol)
           (intern
-           (format nil "~A~{'~A~}"
-                   (symbol-name action-symbol)
+           (format nil "~{~A~}~{'~A~}"
+                   (mapcar #'(lambda (a)
+                               (symbol-name (action-symbol a)))
+                           actions)
                    (mapcar #'(lambda (p)
                                (let ((extension (phrase-extension p)))
                                  (if (null extension)
                                      ""
                                      (extension-canonical-form extension))))
                            phrases))
-           (symbol-package action-symbol))))))
+           (symbol-package (action-symbol (first actions))))))))
 
 (defun ensure-symbol-without-dot-at-end (symbol)
   (let ((symbol-name (string-right-trim '(#\.) (symbol-name symbol))))
     (find-symbol symbol-name (symbol-package symbol))))
 
 (defun get-function-lambda-list-from-expression (expr)
-  (with-slots (action phrases) expr
-    (with-slots (parameter) action
-      (mapcar #'transform (append (when parameter (list parameter))
-                                  phrases)))))
+  (with-slots (actions phrases) expr
+    (let* ((parametric? (some #'action-parameter actions)))
+      (mapcar #'transform
+              (append (when parametric?
+                        (mapcar #'action-parameter actions))
+                      phrases)))))
 
 (defun transform-expr/call (expr)
-  (with-slots (action phrases) expr
-    (with-slots ((action-symbol symbol)
-                 (action-parameter parameter)) action
+  (with-slots (actions phrases) expr
+    (let* ((parametric? (some #'action-parameter actions))
+           (single-action-symbol (and (not parametric?)
+                                      (action-symbol (first actions)))))
       (if (and (not phrases)
-               (not action-parameter))
+               (not parametric?))
           (let ((fun-sym (gensym "fun-")))
-            `(let ((,fun-sym (handler-case (function ,action-symbol)
+            `(let ((,fun-sym (handler-case (function ,single-action-symbol)
                                (undefined-function ()
-                                 (lambda () ,action-symbol)))))
+                                 (lambda () ,single-action-symbol)))))
                (funcall ,fun-sym)))
           `(,(get-function-symbol-from-expression expr)
             ,@(get-function-lambda-list-from-expression expr))))))
 
 (defun transform-expr/sözdizimi-olsun (expr)
-  (let* ((action (expression-action expr))
+  (let* ((action (first (expression-actions expr)))
          (phrases (expression-phrases expr))
          (parameter (action-parameter action))
          (action-parameter-base (when parameter (phrase-base parameter)))
@@ -107,7 +113,7 @@
          ,(transform (code-block-body action-parameter-base))))))
 
 (defun transform-expr/olsun (expr)
-  (let* ((action (expression-action expr))
+  (let* ((action (first (expression-actions expr)))
          (phrases (expression-phrases expr))
          (action-parameter (action-parameter action))
          (action-parameter-base (when action-parameter

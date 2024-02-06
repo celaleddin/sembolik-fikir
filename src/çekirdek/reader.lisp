@@ -24,9 +24,9 @@
 ;;      5'in
 ;; <base>'<extension>
 
-(defstruct expression phrases action)
+(defstruct expression phrases actions)
 ;; istanbul'dan ankara'ya git.
-;; <phrases> <action>.
+;; <phrases> <actions>.
 
 (defstruct action symbol parameter lisp-symbol?)
 ;; git
@@ -180,20 +180,25 @@
                     (not (symbolp (phrase-base phrase))))
             (return (make-expression :phrases expr))))))
 
-   (let* ((possible-parametric-action-index (max 0 (- (length expr) 2)))
-          (possible-parametric-action (nth possible-parametric-action-index expr))
-          (is-action-parametric? (and possible-parametric-action
-                                      (phrase-is-parametric? possible-parametric-action)))
-          (action-position (if is-action-parametric?
-                               possible-parametric-action-index
+   (let* ((maybe-parametric-action-index (position-if (lambda (p)
+                                                        (phrase-is-parametric? p))
+                                                      expr))
+          (maybe-parametric-actions (and maybe-parametric-action-index
+                                         (nthcdr maybe-parametric-action-index expr)))
+          (action-position (or maybe-parametric-action-index
                                (1- (length expr))))
           (phrases (subseq expr 0 action-position))
-          (action-phrase (nth action-position expr))
-          (action (make-action :symbol (phrase-base action-phrase)
-                               :lisp-symbol? (phrase-base-lisp-expr? action-phrase)
-                               :parameter (when is-action-parametric?
-                                            (lastcar expr)))))
-     (return (make-expression :phrases phrases :action action)))))
+
+          (actions (if (not maybe-parametric-action-index)
+                       (let ((action-phrase (nth action-position expr)))
+                         (list (make-action :symbol (phrase-base action-phrase)
+                                            :lisp-symbol? (phrase-base-lisp-expr? action-phrase))))
+                       (iter (for phrases on maybe-parametric-actions by #'cddr)
+                         (collect (let ((action-symbol (first phrases))
+                                        (parameter (second phrases)))
+                                    (make-action :symbol (phrase-base action-symbol)
+                                                 :parameter parameter)))))))
+     (return (make-expression :phrases phrases :actions actions)))))
 
 
 (defreader read-phrase (stream)
