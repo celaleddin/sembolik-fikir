@@ -27,6 +27,16 @@ yanlış
 > 3'ten 30'a 4'er listele.
 (3 7 11 15 19 23 27)
 
+> (sayı tek-mi-çift-mi?) olsun: (
+    (sayı tek-mi?) doğruysa: "Tek" yanlışsa: "Çift"
+  ).
+
+> 5 tek-mi-çift-mi?
+  Tek
+
+> 10 tek-mi-çift-mi?
+  Çift
+
 > pi 3.14, yarıçap 5 olsun: (
     yazdır: "Çemberin alanı:".
     pi çarpı: (yarıçap'ın karesi).

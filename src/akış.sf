@@ -1,0 +1,13 @@
+sf >
+
+(test doğruysa: doğruysa yanlışsa: yanlışsa) sözdizimi-olsun: (
+  @`(if ,|test| ,|doğruysa| ,|yanlışsa|)
+).
+
+(test doğruysa: ifade) sözdizimi-olsun: (
+  @`(when ,|test| ,|ifade|)
+).
+
+(test yanlışsa: ifade) sözdizimi-olsun: (
+  @`(unless ,|test| ,|ifade|)
+).

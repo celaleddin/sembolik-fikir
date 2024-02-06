@@ -1,5 +1,5 @@
 sf >
 
 (yazdır: şey) olsun: (
-  şey @cl:princ.
+  @(format t "~A~%" |şey|)
 ).

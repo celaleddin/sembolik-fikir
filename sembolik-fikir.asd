@@ -23,6 +23,7 @@
                 :default-component-class sf-source-file
                 :serial t
                 :components ((:file "sözdizimi")
+                             (:file "akış")
                              (:file "araçlar")
                              (:file "prosedür")
                              (:file "matematik")
