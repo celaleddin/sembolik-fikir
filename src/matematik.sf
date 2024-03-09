@@ -3,37 +3,109 @@ sf >
 doğru @'t olsun.
 yanlış @'nil olsun.
 
-(a değil) olsun: (a @not).
-(değil: a) olsun: (a değil).
+(a değil) =: (a @not).
+(değil: a) =: (a değil).
 
-(a b *) olsun: (a b @cl:*).
-(a *: b) olsun: (a b *).
-(a çarpı: b) olsun: (a b *).
+(a b *) =: (a b @cl:*).
+(a *: b) =: (a b *).
+(a çarpı: b) =: (a b *).
 
-(a b /) olsun: (a b @cl:/).
-(a /: b) olsun: (a b /).
-(a bölü: b) olsun: (a b /).
+(a b /) =: (a b @cl:/).
+(a /: b) =: (a b /).
+(a bölü: b) =: (a b /).
 
-(a b +) olsun: (a b @cl:+).
-(a +: b) olsun: (a b +).
-(a artı: b) olsun: (a b +).
+(a b +) =: (a b @cl:+).
+(a +: b) =: (a b +).
+(a artı: b) =: (a b +).
 
-(a b -) olsun: (a b @cl:-).
-(a -: b) olsun: (a b -).
-(a eksi: b) olsun: (a b -).
+(a b -) =: (a b @cl:-).
+(a -: b) =: (a b -).
+(a eksi: b) =: (a b -).
 
 (a'nın karesi) olsun: (
   a çarpı: a.
 ).
 
-(a tek-mi?) olsun: (a @cl:oddp).
-(a çift-mi?) olsun: (
+(a tek-mi?) =: (a @cl:oddp).
+(a çift-mi?) =: (
   değil: (a tek-mi?).
 ).
 
-(a negatif-mi?) olsun: (a @cl:minusp).
-(a sıfır-mı?) olsun: (a @cl:zerop).
-(a pozitif-mi?) olsun: (a @cl:plusp).
+(a negatif-mi?) =: (a @cl:minusp).
+(a sıfır-mı?) =: (a @cl:zerop).
+(a pozitif-mi?) =: (a @cl:plusp).
+
+(a b'den büyük-mü?) =: (a b @cl:>).
+(a b'den küçük-mü?) =: (a b @cl:<).
+(a >: b) =: (a b @cl:>).
+(a <: b) =: (a b @cl:<).
+(a >=: b) =: (a b @cl:>=).
+(a <=: b) =: (a b @cl:<=).
+
+(a b'ye eşit-mi?) =: (a b @cl:=).
+(a b'ye eşit-değil-mi?) =: (
+  değil: (a b'ye eşit-mi?).
+).
+(a b =) =: (a b'ye eşit-mi?).
+(a b !=) =: (a b'ye eşit-değil-mi?).
+
+(a sayı-mı?) =: (a @numberp).
+(a reel-sayı-mı?) =: (a @realp).
+(a rasyonel-sayı-mı?) =: (a @rationalp).
+(a ondalık-sayı-mı?) =: (a @floatp). ;; 'Ondalık' doğru kelime mi?
+(a tam-sayı-mı?) =: (a @integerp).
+(a kompleks-sayı-mı?) =: (a @complexp).
+
+(a 1+.) =: (a artı: 1).
+(a 1-.) =: (a eksi: 1).
+
+(a'nın karekökü) =: (a @cl:sqrt).
+
+pi =: @cl:pi .
+(a üssü: b) =: (a b @cl:expt).
+(a üzeri: b) =: (a üssü: b).
+
+(radyan->derece: radyan) =: (
+  (radyan bölü: pi) çarpı: 180.
+).
+(derece->radyan: derece) =: (
+  (derece çarpı: pi) bölü: 180.
+).
+
+(sin: a) =: ((derece->radyan: a) @cl:sin).
+(cos: a) =: ((derece->radyan: a) @cl:cos).
+(tan: a) =: ((derece->radyan: a) @cl:tan).
+
+(asin: a) =: ((derece->radyan: a) @cl:asin).
+(acos: a) =: ((derece->radyan: a) @cl:acos).
+(atan: a) =: ((derece->radyan: a) @cl:atan).
+
+(sayı-listesi'nin minimumu) =: (
+  @(apply #'min |sayı-listesi|)
+).
+
+(sayı-listesi'nin maksimumu) =: (
+  @(apply #'max |sayı-listesi|)
+).
+
+(yuvarla: a) =: (a @cl:round).
+(aşağı-yuvarla: a) =: (a @cl:floor).
+(yukarı-yuvarla: a) =: (a @cl:ceiling).
+(ondalıktan-kurtul: a) =: (a @cl:truncate).
+
+(a mod: b) =: (a b @cl:mod).
+
+(işaret: a) =: (a @cl:signum).
+
+(rastgele-sayı: maksimum) =: (maksimum @cl:random).
+
+(pay: rasyonel-sayı) =: (rasyonel-sayı @cl:numerator).
+(payda: rasyonel-sayı) =: (rasyonel-sayı @cl:denominator).
+
+(gerçek-kısım: kompleks-sayı) =: (kompleks-sayı @cl:realpart).
+(sanal-kısım: kompleks-sayı) =: (kompleks-sayı @cl:imagpart).
+
+(mutlak-değer: a) =: (a @cl:abs).
 
 (f'nin türevi) olsun: (
   [ t |
