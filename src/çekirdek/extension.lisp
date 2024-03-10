@@ -46,3 +46,5 @@
 (register-extension ("er" "ar") "ş")
 
 (register-extension ("in" "ın" "ün" "un") "n")
+
+(register-extension ("le" "la") "y")
