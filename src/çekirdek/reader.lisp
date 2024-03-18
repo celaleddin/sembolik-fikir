@@ -11,7 +11,9 @@
            #:|sözdizimi-olsun:|
 
            #:read-source-code
+           #:read-source-code-from-string
            #:transform
+           #:get-function-symbol-from-expression
 
            #:rpl
            #:repl))
@@ -121,7 +123,7 @@
 (defun repl ()
   (loop (format t "~A~%" (eval (transform (read-expression))))))
 
-(defun read-source-code% (string)
+(defun read-source-code-from-string (string)
   (with-input-from-string (s string)
     (read-source-code s)))
 
@@ -299,8 +301,8 @@
                                                (split-sequence #\space
                                                                first-part
                                                                :remove-empty-subseqs t))
-                               :body (read-source-code% second-part))
-               (make-procedure :params nil :body (read-source-code% first-part))))))
+                               :body (read-source-code-from-string second-part))
+               (make-procedure :params nil :body (read-source-code-from-string first-part))))))
 
 
 (defreader read-group-of-expressions (stream)
@@ -326,7 +328,7 @@
   (collect (read-next-char stream) into result result-type 'string)
 
   (finally
-   (return (make-code-block :body (read-source-code% result)))))
+   (return (make-code-block :body (read-source-code-from-string result)))))
 
 
 (defreader read-list (stream)

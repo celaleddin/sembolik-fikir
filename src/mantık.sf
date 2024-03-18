@@ -1,0 +1,7 @@
+sf >
+
+doğru @'t olsun.
+yanlış @'nil olsun.
+
+(a değil) =: (a @not).
+(değil: a) =: (a değil).

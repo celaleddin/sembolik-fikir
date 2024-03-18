@@ -5,9 +5,9 @@ sf >
   @`(quote ,|sembol|).
 ).
 
-;; `sembol`ün ifade ettiği prosedürü ele al
-(prosedür: sembol) sözdizimi-olsun: (
-  @`(function ,|sembol|).
+(prosedür: prosedür-imzası) sözdizimi-olsun: (
+  @`(function ,(get-function-symbol-from-expression
+                 (first (read-source-code-from-string |prosedür-imzası|)))).
 ).
 
 (sembol değer sabit-olsun) sözdizimi-olsun: (

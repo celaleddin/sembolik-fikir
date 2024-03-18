@@ -24,5 +24,11 @@
 (defun run-tests ()
   (run! 'sf-tests))
 
+(defun eval-sf (sf-string)
+  (eval (sf sf-string)))
+
+(defun subexpr? (lisp-expr sf-code)
+  (member lisp-expr (sf sf-code) :test #'equal))
+
 (def-suite sf-tests
   :description "sembolik-fikir test suite")

@@ -7,11 +7,16 @@
 (in-suite transform)
 
 (test simple-variable-definition
-  (is-all-equal
-    ((sf "a 5 olsun.") '(defparameter |a| 5))
-    ((sf "sayı olsun: 20.") '(defparameter |sayı| 20))
-    ((sf "b =: 10") '(defparameter |b| 10))
-    ))
+  (is (subexpr?
+       '(defparameter |a| 5)
+       "a 5 olsun."))
+  (is (subexpr?
+       '(defparameter |sayı| 20)
+       "sayı olsun: 20."))
+  (is (subexpr?
+       '(defparameter |b| 10)
+       "b =: 10"))
+  )
 
 (test comments
   (is-all-equal
@@ -49,31 +54,31 @@
          (+ |x| |y| |z| |t|))))))
 
 (test procedure-definition
-  (is-all-equal
-    ((sf "(a'nın karesi) olsun: ( a a @* )")
-     '(defun |karesi'in| (|a|)
-       (* |a| |a|)))
-
-    ((sf "(yazdır: şey) olsun: ( şey @print )")
-     '(defun |yazdır:| (|şey|)
-       (print |şey|)))
-
-    ((sf "(x'ten y'ye z'şer listele) olsun: (
-            @(iterate
-              (for k :from |x| :to |y| :by |z|)
-              (print k))
-          )")
-     '(defun |listele'den'e'er| (|x| |y| |z|)
-       (iterate
-         (for k :from |x| :to |y| :by |z|)
-         (print k))))
-
-    ((sf "(x'ten y'ye yap: prosedür) olsun: (
-            @(mapcar |prosedür| (list |x| |y|))
-          )")
-     '(defun |yap:'den'e| (|prosedür| |x| |y|)
-       (mapcar |prosedür| (list |x| |y|))))
-    ))
+  (is (subexpr?
+       '(defun |karesi'in| (|a|)
+         (* |a| |a|))
+       "(a'nın karesi) olsun: ( a a @* )"))
+  (is (subexpr?
+       '(defun |yazdır:| (|şey|)
+         (print |şey|))
+       "(yazdır: şey) olsun: ( şey @print )"))
+  (is (subexpr?
+       '(defun |listele'den'e'er| (|x| |y| |z|)
+         (iterate
+           (for k :from |x| :to |y| :by |z|)
+           (print k)))
+       "(x'ten y'ye z'şer listele) olsun: (
+          @(iterate
+            (for k :from |x| :to |y| :by |z|)
+            (print k))
+        )"))
+  (is (subexpr?
+       '(defun |yap:'den'e| (|prosedür| |x| |y|)
+         (mapcar |prosedür| (list |x| |y|)))
+       "(x'ten y'ye yap: prosedür) olsun: (
+          @(mapcar |prosedür| (list |x| |y|))
+        )"))
+  )
 
 (test procedure-call
   (is-all-equal

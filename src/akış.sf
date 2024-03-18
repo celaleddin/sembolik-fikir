@@ -11,3 +11,13 @@ sf >
 (test yanlışsa: ifade) sözdizimi-olsun: (
   @`(unless ,|test| ,|ifade|)
 ).
+
+(n kere-yap: prosedür): olsun: (
+  @(dotimes (i |n|)
+     (multiple-value-bind (a b lambda-expr)
+         (function-lambda-expression |prosedür|)
+       (declare (ignore a b))
+       (if (null (second lambda-expr))
+           (funcall |prosedür|)
+           (funcall |prosedür| i))))
+).

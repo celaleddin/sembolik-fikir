@@ -26,6 +26,7 @@
                              (:file "akış")
                              (:file "araçlar")
                              (:file "prosedür")
+                             (:file "mantık")
                              (:file "matematik")
                              (:file "liste")))))
 
@@ -37,4 +38,5 @@
   :perform (test-op (op c) (symbol-call :sf/tests :run-tests))
   :pathname "tests/"
   :components ((:file "package")
-               (:file "transform")))
+               (:file "transform")
+               (:file "akış")))

@@ -91,11 +91,9 @@
                                       (action-symbol (first actions)))))
       (if (and (not phrases)
                (not parametric?))
-          (let ((fun-sym (gensym "fun-")))
-            `(let ((,fun-sym (handler-case (function ,single-action-symbol)
-                               (undefined-function ()
-                                 (lambda () ,single-action-symbol)))))
-               (funcall ,fun-sym)))
+          `(if (fboundp ',single-action-symbol)
+               (,single-action-symbol)
+               ,single-action-symbol)
           `(,(get-function-symbol-from-expression expr)
             ,@(get-function-lambda-list-from-expression expr))))))
 
@@ -108,9 +106,12 @@
     (assert (code-block-p (first phrase-bases)))
     (assert (code-block-p action-parameter-base))
     (let ((from-expr (first (code-block-body (first phrase-bases)))))
-      `(defmacro ,(get-function-symbol-from-expression from-expr)
-           ,(get-function-lambda-list-from-expression from-expr)
-         ,(transform (code-block-body action-parameter-base))))))
+      (let ((macro-symbol (get-function-symbol-from-expression from-expr)))
+        `(progn
+           (export ',macro-symbol (symbol-package ',macro-symbol))
+           (defmacro ,macro-symbol
+               ,(get-function-lambda-list-from-expression from-expr)
+             ,(transform (code-block-body action-parameter-base))))))))
 
 (defun transform-expr/olsun (expr)
   (let* ((action (first (expression-actions expr)))
@@ -145,8 +146,11 @@
        (error "no matching 'olsun' pattern")))))
 
 (defun transform-expr/olsun/defvar (var-phrase value-phrase)
-  `(defparameter ,(transform var-phrase)
-     ,(transform value-phrase)))
+  (let ((param-symbol (transform var-phrase)))
+    `(progn
+       (export ',param-symbol (symbol-package ',param-symbol))
+       (defparameter ,param-symbol
+         ,(transform value-phrase)))))
 
 (defun transform-expr/olsun/let (bindings body)
   `(let* (,@(iterate
@@ -159,11 +163,27 @@
 
 (defun transform-expr/olsun/defun (expr body)
   (let ((function-symbol (get-function-symbol-from-expression expr)))
-    `(defun ,function-symbol (,@(get-function-lambda-list-from-expression expr))
-       ,(transform body))))
+    `(progn
+       (setf (get ',function-symbol :interface) ,(read-procedure-signature-from-expression expr))
+       (export ',function-symbol (symbol-package ',function-symbol))
+       (defun ,function-symbol (,@(get-function-lambda-list-from-expression expr))
+         ,(transform body)))))
 
 (defun phrase-bases (phrases)
   (mapcar #'phrase-base phrases))
+
+(defun read-procedure-signature-from-expression (expr)
+  (let ((exp-string
+          (with-output-to-string (out)
+            (dolist (phrase (expression-phrases expr))
+              (format out "~A~@['~A~] " (phrase-base phrase)
+                      (phrase-extension phrase)))
+            (dolist (action (expression-actions expr))
+              (format out "~A~@[ ~A~] " (action-symbol action)
+                      (let ((param-phrase (action-parameter action)))
+                        (when param-phrase
+                          (phrase-base param-phrase))))))))
+    (string-trim '(#\space) exp-string)))
 
 ;; x 5 olsun.
 ;; y olsun: 10.

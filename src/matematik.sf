@@ -1,15 +1,10 @@
 sf >
 
-doğru @'t olsun.
-yanlış @'nil olsun.
-
 pi @cl:pi olsun.
-
-(a değil) =: (a @not).
-(değil: a) =: (a değil).
 
 (a *: b) =: (a b @cl:*).
 (a çarpı: b) =: (a *: b).
+(a kere: b) =: (a *: b).
 (sayılar *) =: (
   @(apply #'cl:* |sayılar|)
 ).

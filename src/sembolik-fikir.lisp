@@ -45,6 +45,13 @@
 (define-symbol-macro sf
     (progn
       (in-package :sf)
-      (in-readtable sf-readtable)))
+      (in-readtable sf-readtable)
+      t))
+
+(define-symbol-macro nsf
+    (progn
+      (in-package :cl-user)
+      (in-readtable :common-lisp)
+      t))
 
 (use-package '(:sf) :cl-user)
